@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="jquery-1.2.6.min.js"></script>
+        <script src="sockit.js"></script>
+        <script>
+            $(function() {
+                socket = io.connect("192.168.2.147:8001");
+
+                socket.on("connect", function(data) {
+                    socket.emit("login", { username: "tester"+Math.floor(Math.random()*9999) });
+                });
+
+                socket.on("server message", function (data) {
+                    $("#chat").append($('<div class="message">'+data.text+'</span>'));
+                });
+
+                $('#buttonsubmit').click(function() {
+                    socket.emit('client message', { text: $('#messagetext').val() });
+                });
+            });
+        </script>
+    </head>
+
+    <body>
+        <div id="chat">
+        </div>
+        <input name="messagetext" id="messagetext" type="text" />
+        <input name="buttonsubmit" id="buttonsubmit" value="foo" type="button" />
+    </body>
+
+</html>

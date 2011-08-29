@@ -1,0 +1,83 @@
+<html>
+<head>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        body, html {
+            height: 100%;
+        }
+        #c {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    <script type="text/javascript" src="jquery-1.2.6.min.js"></script>
+    <script type="text/javascript" src="sockit.js"></script>
+
+    <script type="text/javascript">
+        var ctx;
+        var lastPos = null;
+
+        $(function () {
+            var myColor = Math.floor(Math.random() * 0xFFFFFF);
+
+            ctx = document.getElementById("c").getContext('2d');
+            ctx.lineWidth = 3;
+
+            resize();
+
+            $('#c').mousemove(function (m) {
+                if (!lastPos)
+                    lastPos = [m.clientX, m.clientY];
+
+                var lastStroke = ctx.strokeStyle;
+                ctx.strokeStyle = "#" + myColor.toString(16);
+                drawLine({ oldX: lastPos[0], oldY: lastPos[1], "x": m.clientX, "y": m.clientY });
+                ctx.strokeStyle = lastStroke; 
+
+                lastPos = [m.clientX, m.clientY];
+
+                //ctx.fillRect(m.clientX, m.clientY, 10, 10);
+                socket.emit('client move', { "x": m.clientX, "y": m.clientY });
+            });
+
+            $(window).bind("resize", resize);
+
+            //Socket.io
+            socket = io.connect("192.168.2.147:8001");
+
+            socket.on("server move", function (data) {
+                var lastStroke = ctx.strokeStyle;
+                ctx.strokeStyle = "#" + data.color.toString(16);
+                drawLine({ oldX: data.old_x, oldY: data.old_y, x: data.x, y: data.y });
+                ctx.strokeStyle = lastStroke; 
+            });
+
+            socket.on("connect", function (data) {
+                socket.emit("login", { "username": "tester" + Math.floor(Math.random() * 9999), "color": myColor });
+            });
+
+        });
+
+        function drawLine(pos) {
+            
+            ctx.moveTo(pos.oldX, pos.oldY);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke(); 
+        }
+
+        function resize() {
+            ctx.canvas.width = window.innerWidth;
+            ctx.canvas.height = window.innerHeight;
+        }
+    </script>
+</head>
+<body>
+    <div id="container">
+        <canvas id="c" width="100%" height="100%" />
+    </div>
+</body>
+</html>
