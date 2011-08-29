@@ -47,7 +47,7 @@
             $(window).bind("resize", resize);
 
             //Socket.io
-            socket = io.connect("192.168.2.147:8001");
+            socket = io.connect("http://localhost:8001");
 
             socket.on("server move", function (data) {
                 var lastStroke = ctx.strokeStyle;
